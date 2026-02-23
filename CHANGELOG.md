@@ -5,6 +5,24 @@ All notable changes to BongoCat-mac will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **🏆 JSON-Driven Achievements System** - Replaced hardcoded milestone intervals with a flexible Achievement model loaded from `achievements.json`
+  - 47 built-in achievements across keystroke, mouse click, and total activity milestones
+  - Each achievement has its own id, type, title, icon, and message for rich notifications
+  - Tracks notified achievements by ID in UserDefaults; migrates existing users' old-style tracking on first launch
+  - Falls back to default thresholds if `achievements.json` is missing or invalid
+  - Added "Send test" button in Preferences > Notifications for easy testing
+- **🏷️ Floating Key Label Animation** - Each key press now spawns a floating label above the corresponding paw
+  - Labels display the pressed key as symbols (↵ ⌫ ⎋ ␣ etc.), float 45px upward and fade out over 1 second with an easeOut animation
+  - Multiple labels stack independently so rapid typing produces overlapping floaters
+  - Mouse left/right clicks show "L" / "R" labels on the respective paw side
+  - Labels are mirrored correctly when the cat is horizontally flipped
+- **📊 Keystroke Counter Display** - Added a stroke counter label below the cat sprite in the overlay window
+  - Overlay window height increased from 125px to 147px to accommodate the counter
+
 ## [1.8.5] - 2025-09-30
 
 Apple review feedback
