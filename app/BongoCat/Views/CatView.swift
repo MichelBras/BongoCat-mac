@@ -752,12 +752,15 @@ struct CatView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Clear background area (18.5% of total height to match original 25px/135px)
-                Color.clear
-                    .frame(height: geometry.size.height * 0.185)
+            let counterHeight: CGFloat = 22
+            let catRegionHeight = geometry.size.height - counterHeight
 
-                // Red cat area (81.5% of total height to match original 110px/135px)
+            VStack(spacing: 0) {
+                // Clear background area (18.5% of cat region height)
+                Color.clear
+                    .frame(height: catRegionHeight * 0.185)
+
+                // Cat area (81.5% of cat region height)
                 ZStack {
                     Color.clear
                     //Color.red //DEBUG
@@ -817,7 +820,14 @@ struct CatView: View {
                             }
                         }
                 }
-                .frame(height: geometry.size.height * 0.815)
+                .frame(height: catRegionHeight * 0.815)
+
+                // Stroke counter
+                Text("\(animationController.strokeCounter.totalStrokes)")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: counterHeight)
             }
         }
         .scaleEffect(animationController.viewScale)  // Apply view scaling
