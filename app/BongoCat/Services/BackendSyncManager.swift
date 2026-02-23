@@ -30,6 +30,28 @@ enum BackendAuthState: Equatable {
     case signedIn(email: String?)
 }
 
+// MARK: - Session Record
+
+struct SessionRecord: Decodable, Identifiable {
+    let id: String
+    let started_at: String
+    let ended_at: String?
+    let keystrokes: Int
+    let mouse_clicks: Int
+    let total_strokes: Int
+    let app_version: String?
+
+    var startDate: Date {
+        ISO8601DateFormatter().date(from: started_at) ?? .distantPast
+    }
+    var endDate: Date? {
+        ended_at.flatMap { ISO8601DateFormatter().date(from: $0) }
+    }
+    var duration: TimeInterval? {
+        endDate.map { $0.timeIntervalSince(startDate) }
+    }
+}
+
 // MARK: - BackendSyncManager
 
 /// Central coordinator for Supabase backend sync.
@@ -170,6 +192,34 @@ final class BackendSyncManager: NSObject, ObservableObject {
         Task {
             await uploadAchievement(achievement, client: client)
         }
+        #endif
+    }
+
+    // MARK: - Session Fetch
+
+    /// Fetches the most recent sessions for this device (up to `limit`).
+    /// Returns an empty array if Supabase is not configured or the fetch fails.
+    func fetchSessions(limit: Int = 90) async -> [SessionRecord] {
+        #if canImport(Supabase)
+        guard isConfigured, let client = supabaseClient else { return [] }
+        guard let deviceUUID = await resolveDeviceUUID(
+            deviceId: DeviceIdentity.deviceId, client: client
+        ) else { return [] }
+        do {
+            let response = try await client
+                .from("sessions")
+                .select("id, started_at, ended_at, keystrokes, mouse_clicks, total_strokes, app_version")
+                .eq("device_id", value: deviceUUID)
+                .order("started_at", ascending: false)
+                .limit(limit)
+                .execute()
+            return try JSONDecoder().decode([SessionRecord].self, from: response.data)
+        } catch {
+            print("⚠️ Failed to fetch sessions: \(error.localizedDescription)")
+            return []
+        }
+        #else
+        return []
         #endif
     }
 
