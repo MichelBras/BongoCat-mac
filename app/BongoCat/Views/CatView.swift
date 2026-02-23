@@ -102,6 +102,13 @@ enum InputType {
     case trackpadTouch
 }
 
+// MARK: - Floating Key Label
+struct FloatingKeyLabelItem: Identifiable {
+    let id = UUID()
+    let text: String
+    let xOffset: CGFloat
+}
+
 // MARK: - Observable Cat Animation Controller
 class CatAnimationController: ObservableObject {
     @Published var currentState: CatState = .idle
@@ -128,6 +135,8 @@ class CatAnimationController: ObservableObject {
     private var minimumAnimationDuration: TimeInterval = 0.1  // Minimum animation duration
     private var keyHeldDown: Bool = false  // Track if a key is currently held down
     private var isAlternatingLeft: Bool = true  // Track alternating paw state (starts with left)
+
+    @Published var floatingLabels: [FloatingKeyLabelItem] = []
 
     // Trackpad touch tracking
     private var trackpadTouchTimer: Timer?
@@ -228,6 +237,32 @@ class CatAnimationController: ObservableObject {
         print("Paw behavior mode set to: \(mode.displayName)")
     }
 
+    // MARK: - Floating Key Label Helpers
+
+    private func keyDisplayText(_ key: String) -> String {
+        switch key {
+        case "\r", "\n":      return "↵"
+        case "\t":            return "⇥"
+        case " ":             return "␣"
+        case "\u{7f}", "\u{8}": return "⌫"
+        case "\u{1b}":        return "⎋"
+        default:
+            guard !key.isEmpty else { return "?" }
+            let first = key.unicodeScalars.first!.value
+            if first < 32 || (first >= 0xF700 && first <= 0xF7FF) { return "Fn" }
+            return key.count == 1 ? key.uppercased() : String(key.prefix(3))
+        }
+    }
+
+    func addFloatingLabel(text: String, xOffset: CGFloat) {
+        let actualXOffset = isFlippedHorizontally ? -xOffset : xOffset
+        let item = FloatingKeyLabelItem(text: text, xOffset: actualXOffset)
+        floatingLabels.append(item)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) { [weak self] in
+            self?.floatingLabels.removeAll { $0.id == item.id }
+        }
+    }
+
     // MARK: - Paw Assignment Based on Behavior Mode
     private func getPawForKey(_ key: String) -> Bool {
         switch pawBehaviorMode {
@@ -289,6 +324,8 @@ class CatAnimationController: ObservableObject {
             print("⌨️ Keyboard down detected - key: \(key)")
             strokeCounter.incrementKeystrokes()
             triggerKeyboardDown(for: key)
+            let isLeftPaw = currentState == .leftPawDown
+            addFloatingLabel(text: keyDisplayText(key), xOffset: isLeftPaw ? -28 : 28)
         case .keyboardUp(let key):
             print("⌨️ Keyboard up detected - key: \(key)")
             triggerKeyboardUp(for: key)
@@ -300,6 +337,7 @@ class CatAnimationController: ObservableObject {
             print("🖱️ Left click down detected - left paw animation")
             strokeCounter.incrementMouseClicks()
             triggerPawAnimation(.leftPawDown)
+            addFloatingLabel(text: "L", xOffset: -28)
         case .leftClickUp:
             if ignoreClicksEnabled {
                 print("🖱️ Left click up ignored (ignore clicks enabled)")
@@ -315,6 +353,7 @@ class CatAnimationController: ObservableObject {
             print("🖱️ Right click down detected - right paw animation")
             strokeCounter.incrementMouseClicks()
             triggerPawAnimation(.rightPawDown)
+            addFloatingLabel(text: "R", xOffset: 28)
         case .rightClickUp:
             if ignoreClicksEnabled {
                 print("🖱️ Right click up ignored (ignore clicks enabled)")
@@ -747,11 +786,57 @@ struct BongoCatSprite: View {
     }
 }
 
+// MARK: - Floating Label Views
+
+struct FloatingLabelView: View {
+    let item: FloatingKeyLabelItem
+    @State private var yOffset: CGFloat = 0
+    @State private var opacity: Double = 1.0
+
+    var body: some View {
+        Text(item.text)
+            .font(.system(size: 13, weight: .bold, design: .rounded))
+            .foregroundColor(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.black.opacity(0.75))
+            )
+            .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 1)
+            .offset(x: item.xOffset, y: yOffset)
+            .opacity(opacity)
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.0)) {
+                    yOffset = -45
+                    opacity = 0
+                }
+            }
+    }
+}
+
+struct FloatingLabelsView: View {
+    @EnvironmentObject private var animationController: CatAnimationController
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(animationController.floatingLabels) { item in
+                    FloatingLabelView(item: item)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.45)
+                }
+            }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
 struct CatView: View {
     @EnvironmentObject private var animationController: CatAnimationController
 
     var body: some View {
         GeometryReader { geometry in
+            ZStack {
             VStack(spacing: 0) {
                 // Clear background area (18.5% of total height to match original 25px/135px)
                 Color.clear
@@ -818,6 +903,8 @@ struct CatView: View {
                         }
                 }
                 .frame(height: geometry.size.height * 0.815)
+            }
+            FloatingLabelsView()
             }
         }
         .scaleEffect(animationController.viewScale)  // Apply view scaling
