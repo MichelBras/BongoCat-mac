@@ -321,7 +321,7 @@ final class BackendSyncManager: NSObject, ObservableObject {
             let session = try await client.auth.session
             let email = session.user.email
             authState = .signedIn(email: email)
-            print("✅ Supabase session restored for \(email ?? "user")")
+            print("✅ Supabase session restored for \(maskedEmail(email))")
         } catch {
             authState = .signedOut
         }
@@ -477,15 +477,24 @@ final class BackendSyncManager: NSObject, ObservableObject {
             authState = .signedIn(email: email)
             syncStatus = .success(Date())
 
-            // Link all existing anonymous rows to this user
             let userId = session.user.id.uuidString
+            let deviceId = DeviceIdentity.deviceId
+
+            // Validate both IDs are proper UUIDs before calling the RPC (defense-in-depth)
+            guard UUID(uuidString: deviceId) != nil, UUID(uuidString: userId) != nil else {
+                print("⚠️ Invalid device or user ID format — skipping device link")
+                return
+            }
+
             try? await client
                 .rpc("link_device_to_user", params: [
-                    "p_device_id": AnyJSON.string(DeviceIdentity.deviceId),
+                    "p_device_id": AnyJSON.string(deviceId),
                     "p_user_id": AnyJSON.string(userId)
                 ])
                 .execute()
-            print("✅ Signed in as \(email ?? "user"), device linked")
+
+            // Mask email in logs — never print the full address
+            print("✅ Signed in as \(maskedEmail(email)), device linked")
         } catch {
             syncStatus = .failed(error.localizedDescription)
         }
@@ -493,6 +502,14 @@ final class BackendSyncManager: NSObject, ObservableObject {
 
     private func completeAppleSignIn(identityToken: String) async {
         guard let client = supabaseClient else { return }
+
+        // Basic JWT format check (header.payload.signature)
+        guard !identityToken.isEmpty, identityToken.split(separator: ".").count == 3 else {
+            syncStatus = .failed("Invalid Apple identity token format")
+            print("⚠️ Apple sign-in aborted: malformed identity token")
+            return
+        }
+
         syncStatus = .syncing
         do {
             _ = try await client.auth.signInWithIdToken(
@@ -503,6 +520,16 @@ final class BackendSyncManager: NSObject, ObservableObject {
             syncStatus = .failed(error.localizedDescription)
             print("⚠️ Apple sign-in failed: \(error.localizedDescription)")
         }
+    }
+
+    /// Returns a masked version of an email for safe logging (e.g. "jo***@example.com").
+    private func maskedEmail(_ email: String?) -> String {
+        guard let email = email,
+              let atIndex = email.firstIndex(of: "@") else { return "user" }
+        let local = email[email.startIndex..<atIndex]
+        let domain = email[atIndex...]
+        let prefix = local.prefix(2)
+        return "\(prefix)***\(domain)"
     }
 
     // MARK: Pending session recovery

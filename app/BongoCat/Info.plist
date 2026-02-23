@@ -38,7 +38,7 @@
 			<key>supabase.co</key>
 			<dict>
 				<key>NSExceptionMinimumTLSVersion</key>
-				<string>TLSv1.2</string>
+				<string>TLSv1.3</string>
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>

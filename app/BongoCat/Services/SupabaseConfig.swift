@@ -45,13 +45,8 @@ struct SupabaseConfig {
             return SupabaseConfig(url: url, anonKey: key, source: "supabase-config.plist")
         }
 
-        // 3. Info.plist (last resort, avoid in public repos)
-        if let url = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
-           let key = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_ANON_KEY") as? String,
-           !url.isEmpty, url != "YOUR_SUPABASE_URL",
-           !key.isEmpty {
-            return SupabaseConfig(url: url, anonKey: key, source: "Info.plist")
-        }
+        // Note: Info.plist fallback intentionally omitted — credentials embedded in the
+        // app binary are extractable via reverse engineering. Use env vars or the plist file.
 
         return nil
     }

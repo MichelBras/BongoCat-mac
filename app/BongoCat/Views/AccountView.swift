@@ -244,20 +244,50 @@ struct AccountView: View {
     }
 
     private func submitEmailPassword() {
+        // Client-side validation before hitting the network
+        let trimmedEmail = email.trimmingCharacters(in: .whitespaces).lowercased()
+        guard isValidEmail(trimmedEmail) else {
+            errorMessage = "Please enter a valid email address."
+            return
+        }
+        if isSignUp, password.count < 8 {
+            errorMessage = "Password must be at least 8 characters."
+            return
+        }
+
         errorMessage = nil
         isLoading = true
         Task {
             do {
                 if isSignUp {
-                    try await syncManager.signUp(email: email, password: password)
+                    try await syncManager.signUp(email: trimmedEmail, password: password)
                 } else {
-                    try await syncManager.signIn(email: email, password: password)
+                    try await syncManager.signIn(email: trimmedEmail, password: password)
                 }
             } catch {
-                errorMessage = error.localizedDescription
+                // Normalise error messages to avoid leaking whether an account exists
+                errorMessage = normaliseAuthError(error)
             }
             isLoading = false
         }
+    }
+
+    private func isValidEmail(_ value: String) -> Bool {
+        let regex = #"^[A-Z0-9a-z._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$"#
+        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: value)
+    }
+
+    private func normaliseAuthError(_ error: Error) -> String {
+        let msg = error.localizedDescription.lowercased()
+        if msg.contains("not found") || msg.contains("invalid") ||
+           msg.contains("wrong") || msg.contains("incorrect") ||
+           msg.contains("no user") {
+            return "Incorrect email or password."
+        }
+        if msg.contains("network") || msg.contains("connection") {
+            return "Network error. Please check your connection and try again."
+        }
+        return "Sign in failed. Please try again."
     }
 }
 
