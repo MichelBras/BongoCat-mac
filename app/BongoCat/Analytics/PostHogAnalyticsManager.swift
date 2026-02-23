@@ -527,14 +527,7 @@ class PostHogAnalyticsManager: ObservableObject {
     }
 
     private func getDeviceId() -> String {
-        // Create a consistent device identifier
-        if let identifier = UserDefaults.standard.string(forKey: "BongoCatDeviceId") {
-            return identifier
-        }
-
-        let newIdentifier = UUID().uuidString
-        UserDefaults.standard.set(newIdentifier, forKey: "BongoCatDeviceId")
-        return newIdentifier
+        return DeviceIdentity.deviceId
     }
 
     private func incrementLaunchCount() -> Int {

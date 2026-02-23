@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **☁️ Backend Sync (Phase 1)** - Supabase-powered cloud sync for stats, sessions, and achievements
+  - `BackendSyncManager` coordinates device registration, stats sync (30s debounce), session recording, and achievement upload
+  - Stats are synced automatically while typing; pending syncs are flushed on app resign-active and recovered on next launch
+  - Sessions are recorded at app launch/terminate; incomplete sessions from a crash are recovered on next launch
+  - Achievements are uploaded instantly when unlocked
+  - All sync is additive — the app works fully offline when credentials are not configured
+- **🔑 User Accounts** - Sign in with Apple or email/password via Supabase Auth
+  - Anonymous device data is automatically linked to the account on first sign-in
+  - Sign out returns the app to anonymous mode; local data is never deleted
+  - Account tab added to the Hub window (Achievements 🏆 → Account section)
+  - Account status row added to Preferences → Advanced showing sync state and a "Sign In / Manage" button
+- **🆔 DeviceIdentity** - Extracted persistent device ID into a shared `DeviceIdentity` utility used by analytics and backend sync
+- **🌐 Network entitlements** - Added `com.apple.security.network.client` and Sign in with Apple entitlements
+- **⚙️ Supabase config** - Credential loading from environment variables → `supabase-config.plist` → `Info.plist` (mirrors PostHog pattern); `supabase-config.plist.template` added; actual config file is gitignored
+
 - **🖼️ Hub Window** - Added a new Achievements UI accessible from the menu bar ("Achievements 🏆")
   - Navigation sidebar with support for future sections (Skins, Stats, etc.)
   - Achievements container showing all milestones grouped by category (Keystrokes, Mouse Clicks, Total Activity)

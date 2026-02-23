@@ -87,6 +87,8 @@ Build/
 # Analytics Configuration (keep API keys private!)
 analytics-config.plist
 config.plist
+# Supabase credentials (keep private!)
+supabase-config.plist
 .env
 .env.local
 Demo
