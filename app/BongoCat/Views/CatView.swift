@@ -13,6 +13,9 @@ class StrokeCounter: ObservableObject {
     // Milestone notification manager
     private let milestoneManager = MilestoneNotificationManager.shared
 
+    /// Called after each increment with (keystrokes, mouseClicks, totalStrokes).
+    var onCountsUpdated: ((Int, Int, Int) -> Void)?
+
     init(strokesKey: String = "BongoCatTotalStrokes",
          keystrokesKey: String = "BongoCatKeystrokes",
          mouseClicksKey: String = "BongoCatMouseClicks") {
@@ -31,6 +34,7 @@ class StrokeCounter: ObservableObject {
         // Check for milestone notifications
         milestoneManager.checkKeystrokeMilestone(keystrokes)
         milestoneManager.checkTotalStrokeMilestone(totalStrokes)
+        onCountsUpdated?(keystrokes, mouseClicks, totalStrokes)
     }
 
     func incrementMouseClicks() {
@@ -42,6 +46,7 @@ class StrokeCounter: ObservableObject {
         // Check for milestone notifications
         milestoneManager.checkMouseClickMilestone(mouseClicks)
         milestoneManager.checkTotalStrokeMilestone(totalStrokes)
+        onCountsUpdated?(keystrokes, mouseClicks, totalStrokes)
     }
 
     func reset() {

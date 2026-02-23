@@ -94,6 +94,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
     // Analytics management
     internal let analytics = PostHogAnalyticsManager.shared
 
+    // Backend sync
+    internal let backendSyncManager = BackendSyncManager.shared
+
     // Force SwiftUI updates when settings change
     @Published private var settingsUpdateTrigger: Bool = false
 
@@ -134,6 +137,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
         // Initialize analytics and track app launch
         analytics.trackAppLaunch()
+
+        // Begin backend sync session
+        let currentAppVersion = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "unknown"
+        backendSyncManager.beginSession(appVersion: currentAppVersion)
 
         // Request notification permissions for milestone notifications after a delay
         // This ensures the app is fully initialized before accessing UserNotifications
@@ -182,6 +189,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
         // Track app termination
         analytics.trackAppTerminate()
+
+        // End backend sync session
+        if let inputController = overlayWindow?.catAnimationController {
+            let sc = inputController.strokeCounter
+            backendSyncManager.endSession(
+                keystrokes: sc.keystrokes,
+                mouseClicks: sc.mouseClicks,
+                totalStrokes: sc.totalStrokes
+            )
+        }
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -427,6 +444,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
         // Apply saved position
         overlayWindow?.setPositionProgrammatically(savedPosition)
+
+        // Wire stroke counter → backend sync (debounced 30s)
+        overlayWindow?.catAnimationController?.strokeCounter.onCountsUpdated = { keystrokes, mouseClicks, totalStrokes in
+            Task { @MainActor in
+                BackendSyncManager.shared.scheduleStatsSync(
+                    keystrokes: keystrokes,
+                    mouseClicks: mouseClicks,
+                    totalStrokes: totalStrokes
+                )
+            }
+        }
 
         print("Overlay window created")
     }
@@ -2354,6 +2382,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
     @objc private func applicationDidResignActive() {
         analytics.trackAppBecameInactive()
+        Task { @MainActor in BackendSyncManager.shared.flushPendingSync() }
     }
 
     @objc private func systemWillSleep() {
@@ -2452,7 +2481,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
     // MARK: - Hub Window
 
-    @objc private func openHub() {
+    @objc func openHub() {
         if hubWindowController == nil {
             hubWindowController = HubWindowController(appDelegate: self)
         }

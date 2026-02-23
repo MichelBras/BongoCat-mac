@@ -516,10 +516,44 @@ struct PositionPreferencesView: View {
 
 struct AdvancedPreferencesView: View {
     @ObservedObject var appDelegate: AppDelegate
+    @ObservedObject private var syncManager = BackendSyncManager.shared
     @State private var strokeCount: String = "Loading..."
+
+    @ViewBuilder
+    private var accountStatusLabel: some View {
+        switch syncManager.authState {
+        case .signedOut:
+            Text(syncManager.isConfigured ? "Not signed in" : "Not configured")
+                .foregroundColor(.secondary)
+        case .signedIn(let email):
+            Text(email ?? "Signed in")
+                .foregroundColor(.green)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            PreferencesSection(title: "Account") {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Sync status")
+                            .frame(width: 200, alignment: .leading)
+                        accountStatusLabel
+                        Spacer()
+                    }
+
+                    HStack {
+                        Text("Manage account")
+                            .frame(width: 200, alignment: .leading)
+                        Button("Sign In / Manage") {
+                            appDelegate.openHub()
+                        }
+                        .buttonStyle(.bordered)
+                        Spacer()
+                    }
+                }
+            }
+
             PreferencesSection(title: "Updates") {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {

@@ -5,10 +5,12 @@ import Cocoa
 
 enum HubNavigationItem: String, CaseIterable, Hashable {
     case achievements = "Achievements"
+    case account = "Account"
 
     var systemImage: String {
         switch self {
         case .achievements: return "trophy.fill"
+        case .account: return "person.crop.circle"
         }
     }
 }
@@ -72,6 +74,8 @@ struct HubView: View {
             switch selectedItem {
             case .achievements:
                 AchievementsView(appDelegate: appDelegate)
+            case .account:
+                AccountView(syncManager: BackendSyncManager.shared)
             case nil:
                 Text("Select a section")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

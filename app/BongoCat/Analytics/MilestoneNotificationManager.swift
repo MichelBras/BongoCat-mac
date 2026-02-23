@@ -279,6 +279,7 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
 
             analytics.trackMilestoneReached(achievement.threshold, type: analyticsType)
             sendAchievementNotification(achievement)
+            Task { @MainActor in BackendSyncManager.shared.syncAchievement(achievement) }
         }
     }
 
