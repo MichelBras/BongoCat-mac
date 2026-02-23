@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **📊 Stats Dashboard** - New Stats tab in the Hub showing activity charts, session history, streaks, and personal records
+  - Bar chart of daily keystrokes with 7-day / 30-day range picker
+  - Personal Records: best session keystrokes, best session clicks, longest session, most active day
+  - Streak tracking: current streak and longest streak (consecutive days with activity)
+  - Recent session history showing date, duration, keystroke count, and click count
+  - Graceful degradation: aggregate totals shown when Supabase is not configured; sign-in prompt replaces chart
+
 - **☁️ Backend Sync (Phase 1)** - Supabase-powered cloud sync for stats, sessions, and achievements
   - `BackendSyncManager` coordinates device registration, stats sync (30s debounce), session recording, and achievement upload
   - Stats are synced automatically while typing; pending syncs are flushed on app resign-active and recovered on next launch

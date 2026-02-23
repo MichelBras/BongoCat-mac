@@ -4,11 +4,13 @@ import Cocoa
 // MARK: - Navigation
 
 enum HubNavigationItem: String, CaseIterable, Hashable {
+    case stats = "Stats"
     case achievements = "Achievements"
     case account = "Account"
 
     var systemImage: String {
         switch self {
+        case .stats: return "chart.bar.fill"
         case .achievements: return "trophy.fill"
         case .account: return "person.crop.circle"
         }
@@ -61,7 +63,7 @@ class HubWindowController: NSWindowController, NSWindowDelegate {
 
 struct HubView: View {
     @ObservedObject var appDelegate: AppDelegate
-    @State private var selectedItem: HubNavigationItem? = .achievements
+    @State private var selectedItem: HubNavigationItem? = .stats
 
     var body: some View {
         NavigationSplitView {
@@ -72,6 +74,8 @@ struct HubView: View {
             .navigationSplitViewColumnWidth(min: 150, ideal: 180)
         } detail: {
             switch selectedItem {
+            case .stats:
+                StatsView(appDelegate: appDelegate)
             case .achievements:
                 AchievementsView(appDelegate: appDelegate)
             case .account:
@@ -158,7 +162,7 @@ private struct AchievementsContent: View {
 
 // MARK: - Stats Header
 
-private struct StatsHeaderView: View {
+struct StatsHeaderView: View {
     let keystrokes: Int
     let mouseClicks: Int
     let totalStrokes: Int
@@ -172,7 +176,7 @@ private struct StatsHeaderView: View {
     }
 }
 
-private struct StatCardView: View {
+struct StatCardView: View {
     let value: Int
     let label: String
     let systemImage: String
