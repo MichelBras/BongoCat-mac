@@ -103,7 +103,7 @@ class OverlayWindow: NSWindowController, NSWindowDelegate {
 
     override init(window: NSWindow?) {
         let window = NSWindow(
-            contentRect: NSRect(x: 100, y: 100, width: 150, height: 125), // Reduced from 175x200 to 150x125 to fit cat only
+            contentRect: NSRect(x: 100, y: 100, width: 150, height: 147), // 125px cat + 22px stroke counter
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -248,7 +248,7 @@ class OverlayWindow: NSWindowController, NSWindowDelegate {
 
         // Calculate new window size based on scale
         let baseWidth: CGFloat = 150  // Reduced from 175 to match cat size
-        let baseHeight: CGFloat = 125 // Reduced from 200 to match cat size
+        let baseHeight: CGFloat = 147 // 125px cat + 22px stroke counter
         let newWidth = baseWidth * scale
         let newHeight = baseHeight * scale
 
