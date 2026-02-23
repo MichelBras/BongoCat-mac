@@ -10,6 +10,7 @@
 		16956BFC2E463D2600AD67FC /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 16956BFB2E463D2600AD67FC /* Release.xcconfig */; };
 		16956BFE2E463D6400AD67FC /* Common.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 16956BFD2E463D6400AD67FC /* Common.xcconfig */; };
 		16956C002E463D6B00AD67FC /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 16956BFF2E463D6B00AD67FC /* Debug.xcconfig */; };
+		BC0003AA2E4549BC004B9F40 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = BC0002AA2E4549BC004B9F40 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,25 @@
 		16956BFD2E463D6400AD67FC /* Common.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Common.xcconfig; sourceTree = "<group>"; };
 		16956BFF2E463D6B00AD67FC /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BC0002AA2E4549BC004B9F40 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		165CCF582E89688500A8EDBA /* Exceptions for "BongoCat" folder in "BongoCat" target */ = {
@@ -74,6 +94,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC0003AA2E4549BC004B9F40 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -137,6 +158,7 @@
 			);
 			name = BongoCat;
 			packageProductDependencies = (
+				BC0002AA2E4549BC004B9F40 /* Supabase */,
 			);
 			productName = BongoCat;
 			productReference = 164DF74F2E4549AC004B9F40 /* Bongo Cat Overlay.app */;
@@ -221,6 +243,7 @@
 			mainGroup = 164DF7462E4549AC004B9F40;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 164DF7502E4549AC004B9F40 /* Products */;
