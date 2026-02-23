@@ -39,25 +39,6 @@
 		16956BFF2E463D6B00AD67FC /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/supabase/supabase-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		BC0002AA2E4549BC004B9F40 /* Supabase */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */;
-			productName = Supabase;
-		};
-/* End XCSwiftPackageProductDependency section */
-
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		165CCF582E89688500A8EDBA /* Exceptions for "BongoCat" folder in "BongoCat" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -612,6 +593,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BC0002AA2E4549BC004B9F40 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BC0001AA2E4549BC004B9F40 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 164DF7472E4549AC004B9F40 /* Project object */;
 }
