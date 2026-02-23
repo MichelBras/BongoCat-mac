@@ -3,25 +3,44 @@ import UserNotifications
 import AppKit
 import SwiftUI
 
+// MARK: - Achievement Models
+
+struct Achievement: Codable {
+    let id: String
+    let type: AchievementType
+    let threshold: Int
+    let title: String
+    let icon: String
+    let message: String
+
+    enum AchievementType: String, Codable {
+        case keystrokes
+        case mouseClicks = "mouse_clicks"
+        case total
+    }
+}
+
+private struct AchievementsConfig: Codable {
+    let achievements: [Achievement]
+}
+
+// MARK: - Manager
+
 class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, ObservableObject {
     static let shared = MilestoneNotificationManager()
 
-    // Milestone settings
+    // Notification toggle
     @Published private var notificationsEnabled: Bool = true
     private let notificationsEnabledKey = "BongoCatMilestoneNotificationsEnabled"
 
-    // Default milestone intervals
-    private var milestoneIntervals: [Int] = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 1000000, 10000000]
-    private let milestoneIntervalsKey = "BongoCatMilestoneIntervals"
+    // Loaded achievements grouped by type
+    private var keystrokeAchievements: [Achievement] = []
+    private var mouseClickAchievements: [Achievement] = []
+    private var totalAchievements: [Achievement] = []
 
-    // Track last notified milestones to avoid duplicates
-    private var lastNotifiedKeystrokeMilestone: Int = 0
-    private var lastNotifiedClickMilestone: Int = 0
-    private var lastNotifiedTotalMilestone: Int = 0
-
-    private let lastKeystrokeMilestoneKey = "BongoCatLastKeystrokeMilestone"
-    private let lastClickMilestoneKey = "BongoCatLastClickMilestone"
-    private let lastTotalMilestoneKey = "BongoCatLastTotalMilestone"
+    // Track which achievement IDs have already been notified
+    private var notifiedAchievementIds: Set<String> = []
+    private let notifiedAchievementIdsKey = "BongoCatNotifiedAchievementIds"
 
     // Track if notifications have been set up
     private var notificationsSetup: Bool = false
@@ -33,23 +52,109 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
 
     override init() {
         super.init()
+        loadAchievements()
         loadSettings()
-        // Don't setup notifications immediately - defer until needed
+        migrateFromOldTracking()
+    }
+
+    // MARK: - Achievement Loading
+
+    private func loadAchievements() {
+        guard let url = Bundle.main.url(forResource: "achievements", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let config = try? JSONDecoder().decode(AchievementsConfig.self, from: data) else {
+            print("⚠️ achievements.json not found or invalid — falling back to defaults")
+            loadDefaultAchievements()
+            return
+        }
+
+        keystrokeAchievements = config.achievements
+            .filter { $0.type == .keystrokes }
+            .sorted { $0.threshold < $1.threshold }
+        mouseClickAchievements = config.achievements
+            .filter { $0.type == .mouseClicks }
+            .sorted { $0.threshold < $1.threshold }
+        totalAchievements = config.achievements
+            .filter { $0.type == .total }
+            .sorted { $0.threshold < $1.threshold }
+
+        let total = config.achievements.count
+        print("🏆 Loaded \(total) achievements from achievements.json (\(keystrokeAchievements.count) keystroke, \(mouseClickAchievements.count) click, \(totalAchievements.count) total)")
+    }
+
+    private func loadDefaultAchievements() {
+        let defaultThresholds = [100, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 1000000, 10000000]
+
+        keystrokeAchievements = defaultThresholds.map { threshold in
+            Achievement(
+                id: "keystroke_\(threshold)",
+                type: .keystrokes,
+                threshold: threshold,
+                title: "Keystroke Milestone",
+                icon: "⌨️",
+                message: "You've typed \(formatCount(threshold)) keystrokes!"
+            )
+        }
+        mouseClickAchievements = defaultThresholds.map { threshold in
+            Achievement(
+                id: "click_\(threshold)",
+                type: .mouseClicks,
+                threshold: threshold,
+                title: "Mouse Click Milestone",
+                icon: "🖱️",
+                message: "You've made \(formatCount(threshold)) mouse clicks!"
+            )
+        }
+        totalAchievements = defaultThresholds.map { threshold in
+            Achievement(
+                id: "total_\(threshold)",
+                type: .total,
+                threshold: threshold,
+                title: "Total Activity Milestone",
+                icon: "🎯",
+                message: "Amazing! You've reached \(formatCount(threshold)) total actions!"
+            )
+        }
+    }
+
+    // MARK: - Migration from old tracking format
+
+    private func migrateFromOldTracking() {
+        guard notifiedAchievementIds.isEmpty else { return }
+
+        let oldLastKeystroke = UserDefaults.standard.integer(forKey: "BongoCatLastKeystrokeMilestone")
+        let oldLastClick = UserDefaults.standard.integer(forKey: "BongoCatLastClickMilestone")
+        let oldLastTotal = UserDefaults.standard.integer(forKey: "BongoCatLastTotalMilestone")
+
+        guard oldLastKeystroke > 0 || oldLastClick > 0 || oldLastTotal > 0 else { return }
+
+        for achievement in keystrokeAchievements where achievement.threshold <= oldLastKeystroke {
+            notifiedAchievementIds.insert(achievement.id)
+        }
+        for achievement in mouseClickAchievements where achievement.threshold <= oldLastClick {
+            notifiedAchievementIds.insert(achievement.id)
+        }
+        for achievement in totalAchievements where achievement.threshold <= oldLastTotal {
+            notifiedAchievementIds.insert(achievement.id)
+        }
+
+        if !notifiedAchievementIds.isEmpty {
+            saveSettings()
+            print("🏆 Migrated \(notifiedAchievementIds.count) achievements from old tracking format")
+        }
     }
 
     // MARK: - Setup and Permissions
 
-            private func setupNotifications() {
+    private func setupNotifications() {
         guard !notificationsSetup else { return }
 
-        // Check if we can safely access UserNotifications
         guard canAccessNotifications() else {
             print("⚠️ UserNotifications not available - running in development mode, notifications disabled")
             notificationsEnabled = false
             return
         }
 
-        // Try to safely access the notification center
         let center = UNUserNotificationCenter.current()
         center.delegate = self
         notificationsSetup = true
@@ -57,21 +162,16 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
     }
 
     private func canAccessNotifications() -> Bool {
-        // Check if we have a proper bundle identifier
         guard let bundleId = Bundle.main.bundleIdentifier, !bundleId.isEmpty else {
             return false
         }
-
-        // Check if we're running in an app context (not just a command line tool)
         guard NSRunningApplication.current.activationPolicy != .prohibited else {
             return false
         }
-
         return true
     }
 
     func requestNotificationPermission() {
-        // Ensure notifications are setup first
         setupNotifications()
 
         guard notificationsSetup else {
@@ -79,7 +179,6 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
             return
         }
 
-        // Track permission request
         analytics.trackNotificationPermissionRequested()
 
         let center = UNUserNotificationCenter.current()
@@ -105,33 +204,22 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
     // MARK: - Settings Management
 
     private func loadSettings() {
-        // Load notifications enabled preference
         if UserDefaults.standard.object(forKey: notificationsEnabledKey) != nil {
             notificationsEnabled = UserDefaults.standard.bool(forKey: notificationsEnabledKey)
         }
 
-        // Load custom milestone intervals if any
-        if let savedIntervals = UserDefaults.standard.array(forKey: milestoneIntervalsKey) as? [Int] {
-            milestoneIntervals = savedIntervals
+        if let savedIds = UserDefaults.standard.array(forKey: notifiedAchievementIdsKey) as? [String] {
+            notifiedAchievementIds = Set(savedIds)
         }
 
-        // Load last notified milestones
-        lastNotifiedKeystrokeMilestone = UserDefaults.standard.integer(forKey: lastKeystrokeMilestoneKey)
-        lastNotifiedClickMilestone = UserDefaults.standard.integer(forKey: lastClickMilestoneKey)
-        lastNotifiedTotalMilestone = UserDefaults.standard.integer(forKey: lastTotalMilestoneKey)
-
-        // Track configuration loading
         analytics.trackConfigurationLoaded("milestone_manager", success: true)
 
-        print("🔔 Loaded milestone settings - enabled: \(notificationsEnabled), intervals: \(milestoneIntervals)")
+        print("🔔 Loaded milestone settings - enabled: \(notificationsEnabled), notified: \(notifiedAchievementIds.count) achievements")
     }
 
     private func saveSettings() {
         UserDefaults.standard.set(notificationsEnabled, forKey: notificationsEnabledKey)
-        UserDefaults.standard.set(milestoneIntervals, forKey: milestoneIntervalsKey)
-        UserDefaults.standard.set(lastNotifiedKeystrokeMilestone, forKey: lastKeystrokeMilestoneKey)
-        UserDefaults.standard.set(lastNotifiedClickMilestone, forKey: lastClickMilestoneKey)
-        UserDefaults.standard.set(lastNotifiedTotalMilestone, forKey: lastTotalMilestoneKey)
+        UserDefaults.standard.set(Array(notifiedAchievementIds), forKey: notifiedAchievementIdsKey)
     }
 
     // MARK: - Public Interface
@@ -139,10 +227,7 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
     func setNotificationsEnabled(_ enabled: Bool) {
         notificationsEnabled = enabled
         saveSettings()
-
-        // Track setting change
         analytics.trackSettingToggled("milestone_notifications", enabled: enabled)
-
         print("🔔 Milestone notifications \(enabled ? "enabled" : "disabled")")
     }
 
@@ -150,99 +235,56 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
         return notificationsEnabled
     }
 
-    func setMilestoneIntervals(_ intervals: [Int]) {
-        milestoneIntervals = intervals.sorted()
-        saveSettings()
-
-        // Track advanced feature usage
-        analytics.trackAdvancedFeatureUsage("custom_milestone_intervals", complexity: "advanced", success: true)
-
-        print("🔔 Milestone intervals updated: \(milestoneIntervals)")
+    func sendTestNotification() {
+        let test = Achievement(
+            id: "__test__",
+            type: .keystrokes,
+            threshold: 0,
+            title: "Test Achievement",
+            icon: "🧪",
+            message: "Notifications are working! You'll see these when you hit milestones."
+        )
+        sendAchievementNotification(test)
     }
 
-    func getMilestoneIntervals() -> [Int] {
-        return milestoneIntervals
+    // Returns all loaded achievements (useful for UI display)
+    func allAchievements() -> [Achievement] {
+        return keystrokeAchievements + mouseClickAchievements + totalAchievements
     }
 
     // MARK: - Milestone Checking
 
     func checkKeystrokeMilestone(_ keystrokeCount: Int) {
         guard notificationsEnabled else { return }
-
-        if let milestone = getNextMilestone(for: keystrokeCount, lastNotified: lastNotifiedKeystrokeMilestone) {
-            lastNotifiedKeystrokeMilestone = milestone
-            saveSettings()
-
-            // Track milestone reached in analytics
-            analytics.trackMilestoneReached(milestone, type: "keystrokes")
-
-            sendMilestoneNotification(
-                type: "Keystroke",
-                count: milestone,
-                icon: "⌨️",
-                message: "You've typed \(formatCount(milestone)) keystrokes!"
-            )
-        }
+        checkAchievements(keystrokeAchievements, count: keystrokeCount, analyticsType: "keystrokes")
     }
 
     func checkMouseClickMilestone(_ clickCount: Int) {
         guard notificationsEnabled else { return }
-
-        if let milestone = getNextMilestone(for: clickCount, lastNotified: lastNotifiedClickMilestone) {
-            lastNotifiedClickMilestone = milestone
-            saveSettings()
-
-            // Track milestone reached in analytics
-            analytics.trackMilestoneReached(milestone, type: "mouse_clicks")
-
-            sendMilestoneNotification(
-                type: "Mouse Click",
-                count: milestone,
-                icon: "🖱️",
-                message: "You've made \(formatCount(milestone)) mouse clicks!"
-            )
-        }
+        checkAchievements(mouseClickAchievements, count: clickCount, analyticsType: "mouse_clicks")
     }
 
     func checkTotalStrokeMilestone(_ totalCount: Int) {
         guard notificationsEnabled else { return }
+        checkAchievements(totalAchievements, count: totalCount, analyticsType: "total_activity")
+    }
 
-        if let milestone = getNextMilestone(for: totalCount, lastNotified: lastNotifiedTotalMilestone) {
-            lastNotifiedTotalMilestone = milestone
+    private func checkAchievements(_ achievements: [Achievement], count: Int, analyticsType: String) {
+        for achievement in achievements {
+            guard count >= achievement.threshold else { break }
+            guard !notifiedAchievementIds.contains(achievement.id) else { continue }
+
+            notifiedAchievementIds.insert(achievement.id)
             saveSettings()
 
-            // Track milestone reached in analytics
-            analytics.trackMilestoneReached(milestone, type: "total_activity")
-
-            sendMilestoneNotification(
-                type: "Total Activity",
-                count: milestone,
-                icon: "🎯",
-                message: "Amazing! You've reached \(formatCount(milestone)) total actions!"
-            )
+            analytics.trackMilestoneReached(achievement.threshold, type: analyticsType)
+            sendAchievementNotification(achievement)
         }
     }
 
-    // MARK: - Helper Methods
+    // MARK: - Notification Sending
 
-    private func getNextMilestone(for count: Int, lastNotified: Int) -> Int? {
-        // Find the next milestone that should be notified
-        for milestone in milestoneIntervals {
-            if count >= milestone && milestone > lastNotified {
-                return milestone
-            }
-        }
-        return nil
-    }
-
-    private func formatCount(_ count: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        return formatter.string(from: NSNumber(value: count)) ?? "\(count)"
-    }
-
-    private func sendMilestoneNotification(type: String, count: Int, icon: String, message: String) {
-        // Ensure notifications are setup first
+    private func sendAchievementNotification(_ achievement: Achievement) {
         setupNotifications()
 
         guard notificationsSetup else {
@@ -253,31 +295,31 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
         let center = UNUserNotificationCenter.current()
 
         let content = UNMutableNotificationContent()
-        content.title = "\(icon) BongoCat Milestone!"
-        content.body = message
+        content.title = "\(achievement.icon) \(achievement.title)"
+        content.body = achievement.message
         content.sound = .default
-
-        // Add custom data for potential future use
         content.userInfo = [
-            "type": type,
-            "count": count,
+            "achievementId": achievement.id,
+            "type": achievement.type.rawValue,
+            "threshold": achievement.threshold,
             "milestone": true
         ]
 
-        // Create request with unique identifier
-        let identifier = "milestone-\(type.lowercased().replacingOccurrences(of: " ", with: "-"))-\(count)"
+        let identifier = "achievement-\(achievement.id)"
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: nil)
 
-        // Track notification being shown
-        analytics.trackNotificationShown("milestone", milestone: count)
+        analytics.trackNotificationShown("milestone", milestone: achievement.threshold)
 
         center.add(request) { error in
             DispatchQueue.main.async {
                 if let error = error {
-                    print("❌ Failed to send milestone notification: \(error.localizedDescription)")
-                    self.analytics.trackError("Failed to send milestone notification", context: ["error": error.localizedDescription, "type": type, "count": count])
+                    print("❌ Failed to send achievement notification: \(error.localizedDescription)")
+                    self.analytics.trackError("Failed to send achievement notification", context: [
+                        "error": error.localizedDescription,
+                        "achievementId": achievement.id
+                    ])
                 } else {
-                    print("🔔 Milestone notification sent: \(type) - \(count)")
+                    print("🏆 Achievement notification sent: \(achievement.title) (\(achievement.id))")
                 }
             }
         }
@@ -286,25 +328,27 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
     // MARK: - Reset Methods
 
     func resetMilestoneTracking() {
-        lastNotifiedKeystrokeMilestone = 0
-        lastNotifiedClickMilestone = 0
-        lastNotifiedTotalMilestone = 0
+        notifiedAchievementIds.removeAll()
         saveSettings()
-
-        // Track milestone reset
         analytics.trackAdvancedFeatureUsage("reset_milestone_tracking", complexity: "basic", success: true)
-
         print("🔔 Milestone tracking reset")
+    }
+
+    // MARK: - Helper Methods
+
+    private func formatCount(_ count: Int) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter.string(from: NSNumber(value: count)) ?? "\(count)"
     }
 
     // MARK: - UNUserNotificationCenterDelegate
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        // Handle notification tap
         let userInfo = response.notification.request.content.userInfo
 
         if let type = userInfo["type"] as? String {
-            if type.contains("milestone") || userInfo["milestone"] as? Bool == true {
+            if userInfo["milestone"] as? Bool == true {
                 analytics.trackNotificationClicked("milestone", action: "tap")
             } else {
                 analytics.trackNotificationClicked(type, action: "tap")
@@ -316,7 +360,6 @@ class MilestoneNotificationManager: NSObject, UNUserNotificationCenterDelegate, 
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        // Show notifications even when app is active
         if #available(macOS 11.0, *) {
             completionHandler([.banner, .sound])
         } else {

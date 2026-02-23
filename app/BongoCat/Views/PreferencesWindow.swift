@@ -592,6 +592,14 @@ struct AdvancedPreferencesView: View {
                         ))
                         Spacer()
                     }
+                    HStack {
+                        Text("Test notification")
+                            .frame(width: 200, alignment: .leading)
+                        Button("Send test") {
+                            appDelegate.milestoneManager.sendTestNotification()
+                        }
+                        Spacer()
+                    }
                 }
             }
 

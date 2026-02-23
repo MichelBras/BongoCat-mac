@@ -1,0 +1,390 @@
+{
+  "achievements": [
+    {
+      "id": "keystroke_100",
+      "type": "keystrokes",
+      "threshold": 100,
+      "title": "Warm Paws",
+      "icon": "⌨️",
+      "message": "You've typed 100 keystrokes! BongoCat is just getting warmed up."
+    },
+    {
+      "id": "keystroke_250",
+      "type": "keystrokes",
+      "threshold": 250,
+      "title": "Getting the Hang of It",
+      "icon": "⌨️",
+      "message": "250 keystrokes down. Those paws are moving!"
+    },
+    {
+      "id": "keystroke_500",
+      "type": "keystrokes",
+      "threshold": 500,
+      "title": "Clicky Fingers",
+      "icon": "⌨️",
+      "message": "500 keystrokes! Your fingers are on fire."
+    },
+    {
+      "id": "keystroke_1000",
+      "type": "keystrokes",
+      "threshold": 1000,
+      "title": "One Thousand Taps",
+      "icon": "⌨️",
+      "message": "1,000 keystrokes! BongoCat gives you a proud meow."
+    },
+    {
+      "id": "keystroke_2500",
+      "type": "keystrokes",
+      "threshold": 2500,
+      "title": "Type Racer",
+      "icon": "⌨️",
+      "message": "2,500 keystrokes! You're practically a speed typist."
+    },
+    {
+      "id": "keystroke_5000",
+      "type": "keystrokes",
+      "threshold": 5000,
+      "title": "Keyboard Warrior testing!",
+      "icon": "⌨️",
+      "message": "5,000 keystrokes and counting. Those keys are taking a beating!"
+    },
+    {
+      "id": "keystroke_5550",
+      "type": "keystrokes",
+      "threshold": 5550,
+      "title": "Keyboard Warrior testing!",
+      "icon": "⌨️",
+      "message": "5,000 keystrokes and counting. Those keys are taking a beating!"
+    },
+    {
+      "id": "keystroke_7500",
+      "type": "keystrokes",
+      "threshold": 7500,
+      "title": "Halfway to 10K",
+      "icon": "⌨️",
+      "message": "7,500 keystrokes! You're on a roll."
+    },
+    {
+      "id": "keystroke_10000",
+      "type": "keystrokes",
+      "threshold": 10000,
+      "title": "Ten Thousand",
+      "icon": "🎉",
+      "message": "10,000 keystrokes! BongoCat is thoroughly impressed."
+    },
+    {
+      "id": "keystroke_15000",
+      "type": "keystrokes",
+      "threshold": 15000,
+      "title": "Fifteen Thousand",
+      "icon": "⌨️",
+      "message": "15,000 keystrokes! Your dedication is showing."
+    },
+    {
+      "id": "keystroke_25000",
+      "type": "keystrokes",
+      "threshold": 25000,
+      "title": "Quarter Million Incoming",
+      "icon": "⌨️",
+      "message": "25,000 keystrokes! BongoCat can barely keep up with you."
+    },
+    {
+      "id": "keystroke_50000",
+      "type": "keystrokes",
+      "threshold": 50000,
+      "title": "Fifty Thousand",
+      "icon": "⌨️",
+      "message": "50,000 keystrokes! Your fingers deserve a stretch."
+    },
+    {
+      "id": "keystroke_75000",
+      "type": "keystrokes",
+      "threshold": 75000,
+      "title": "Almost at 100K",
+      "icon": "⌨️",
+      "message": "75,000 keystrokes — almost at the big one!"
+    },
+    {
+      "id": "keystroke_100000",
+      "type": "keystrokes",
+      "threshold": 100000,
+      "title": "One Hundred Thousand",
+      "icon": "🎉",
+      "message": "100,000 keystrokes! BongoCat bows in admiration."
+    },
+    {
+      "id": "keystroke_250000",
+      "type": "keystrokes",
+      "threshold": 250000,
+      "title": "Quarter Million",
+      "icon": "⌨️",
+      "message": "250,000 keystrokes! You are a typing legend."
+    },
+    {
+      "id": "keystroke_500000",
+      "type": "keystrokes",
+      "threshold": 500000,
+      "title": "Half Million",
+      "icon": "⌨️",
+      "message": "500,000 keystrokes! That's some serious dedication."
+    },
+    {
+      "id": "keystroke_750000",
+      "type": "keystrokes",
+      "threshold": 750000,
+      "title": "Three Quarters of a Million",
+      "icon": "⌨️",
+      "message": "750,000 keystrokes! You're almost at a million!"
+    },
+    {
+      "id": "keystroke_1000000",
+      "type": "keystrokes",
+      "threshold": 1000000,
+      "title": "One Million Keystrokes",
+      "icon": "🏆",
+      "message": "ONE MILLION keystrokes! BongoCat is in awe."
+    },
+    {
+      "id": "keystroke_2000000",
+      "type": "keystrokes",
+      "threshold": 2000000,
+      "title": "Two Million",
+      "icon": "⌨️",
+      "message": "2 million keystrokes! You've become one with the keyboard."
+    },
+    {
+      "id": "keystroke_5000000",
+      "type": "keystrokes",
+      "threshold": 5000000,
+      "title": "Five Million",
+      "icon": "⌨️",
+      "message": "5 million keystrokes! BongoCat has worn out three sets of paws."
+    },
+    {
+      "id": "keystroke_10000000",
+      "type": "keystrokes",
+      "threshold": 10000000,
+      "title": "Ten Million",
+      "icon": "🏆",
+      "message": "10 million keystrokes! You are a typing god."
+    },
+
+    {
+      "id": "click_50",
+      "type": "mouse_clicks",
+      "threshold": 50,
+      "title": "First Clicks",
+      "icon": "🖱️",
+      "message": "50 mouse clicks! BongoCat's paw is ready."
+    },
+    {
+      "id": "click_100",
+      "type": "mouse_clicks",
+      "threshold": 100,
+      "title": "Double Clicker",
+      "icon": "🖱️",
+      "message": "100 mouse clicks! You're really clicking along."
+    },
+    {
+      "id": "click_250",
+      "type": "mouse_clicks",
+      "threshold": 250,
+      "title": "250 Clicks",
+      "icon": "🖱️",
+      "message": "250 clicks! Your mouse is getting a workout."
+    },
+    {
+      "id": "click_500",
+      "type": "mouse_clicks",
+      "threshold": 500,
+      "title": "500 Clicks",
+      "icon": "🖱️",
+      "message": "500 mouse clicks! Almost at the big K."
+    },
+    {
+      "id": "click_1000",
+      "type": "mouse_clicks",
+      "threshold": 1000,
+      "title": "One Thousand Clicks",
+      "icon": "🖱️",
+      "message": "1,000 mouse clicks! BongoCat gives a satisfied purr."
+    },
+    {
+      "id": "click_2500",
+      "type": "mouse_clicks",
+      "threshold": 2500,
+      "title": "2,500 Clicks",
+      "icon": "🖱️",
+      "message": "2,500 clicks! Your mouse must be getting tired."
+    },
+    {
+      "id": "click_5000",
+      "type": "mouse_clicks",
+      "threshold": 5000,
+      "title": "5,000 Clicks",
+      "icon": "🖱️",
+      "message": "5,000 mouse clicks! That's a lot of pointing."
+    },
+    {
+      "id": "click_10000",
+      "type": "mouse_clicks",
+      "threshold": 10000,
+      "title": "10,000 Clicks",
+      "icon": "🎉",
+      "message": "10,000 mouse clicks! BongoCat's paw is getting a cramp."
+    },
+    {
+      "id": "click_25000",
+      "type": "mouse_clicks",
+      "threshold": 25000,
+      "title": "25,000 Clicks",
+      "icon": "🖱️",
+      "message": "25,000 clicks! You've worn a groove in that mouse."
+    },
+    {
+      "id": "click_50000",
+      "type": "mouse_clicks",
+      "threshold": 50000,
+      "title": "50,000 Clicks",
+      "icon": "🖱️",
+      "message": "50,000 mouse clicks! BongoCat applauds your dedication."
+    },
+    {
+      "id": "click_100000",
+      "type": "mouse_clicks",
+      "threshold": 100000,
+      "title": "100,000 Clicks",
+      "icon": "🎉",
+      "message": "100,000 mouse clicks! That's one dedicated clicker."
+    },
+    {
+      "id": "click_500000",
+      "type": "mouse_clicks",
+      "threshold": 500000,
+      "title": "500,000 Clicks",
+      "icon": "🖱️",
+      "message": "500,000 mouse clicks! Are you okay? That's a lot."
+    },
+    {
+      "id": "click_1000000",
+      "type": "mouse_clicks",
+      "threshold": 1000000,
+      "title": "One Million Clicks",
+      "icon": "🏆",
+      "message": "ONE MILLION mouse clicks! BongoCat is speechless."
+    },
+
+    {
+      "id": "total_100",
+      "type": "total",
+      "threshold": 100,
+      "title": "First Hundred",
+      "icon": "🎯",
+      "message": "100 total actions! BongoCat is happy to have you."
+    },
+    {
+      "id": "total_500",
+      "type": "total",
+      "threshold": 500,
+      "title": "500 Actions",
+      "icon": "🎯",
+      "message": "500 total actions! You and BongoCat are getting close."
+    },
+    {
+      "id": "total_1000",
+      "type": "total",
+      "threshold": 1000,
+      "title": "1,000 Actions",
+      "icon": "🎯",
+      "message": "1,000 total actions! BongoCat is keeping up with you."
+    },
+    {
+      "id": "total_2500",
+      "type": "total",
+      "threshold": 2500,
+      "title": "2,500 Actions",
+      "icon": "🎯",
+      "message": "2,500 actions! You're really productive today."
+    },
+    {
+      "id": "total_5000",
+      "type": "total",
+      "threshold": 5000,
+      "title": "5,000 Actions",
+      "icon": "🎯",
+      "message": "5,000 total actions! BongoCat's paws are flying."
+    },
+    {
+      "id": "total_10000",
+      "type": "total",
+      "threshold": 10000,
+      "title": "10,000 Actions",
+      "icon": "🎉",
+      "message": "10,000 actions! You and BongoCat make a great team."
+    },
+    {
+      "id": "total_25000",
+      "type": "total",
+      "threshold": 25000,
+      "title": "25,000 Actions",
+      "icon": "🎯",
+      "message": "25,000 total actions! Seriously impressive productivity."
+    },
+    {
+      "id": "total_50000",
+      "type": "total",
+      "threshold": 50000,
+      "title": "50,000 Actions",
+      "icon": "🎯",
+      "message": "50,000 actions! BongoCat needs a catnap."
+    },
+    {
+      "id": "total_100000",
+      "type": "total",
+      "threshold": 100000,
+      "title": "100,000 Actions",
+      "icon": "🎉",
+      "message": "100,000 total actions! BongoCat is in total awe."
+    },
+    {
+      "id": "total_250000",
+      "type": "total",
+      "threshold": 250000,
+      "title": "250,000 Actions",
+      "icon": "🎯",
+      "message": "250,000 actions! You're a productivity machine."
+    },
+    {
+      "id": "total_500000",
+      "type": "total",
+      "threshold": 500000,
+      "title": "500,000 Actions",
+      "icon": "🎯",
+      "message": "500,000 actions! BongoCat can barely keep up."
+    },
+    {
+      "id": "total_1000000",
+      "type": "total",
+      "threshold": 1000000,
+      "title": "One Million Actions",
+      "icon": "🏆",
+      "message": "ONE MILLION total actions! BongoCat is humbled."
+    },
+    {
+      "id": "total_5000000",
+      "type": "total",
+      "threshold": 5000000,
+      "title": "Five Million Actions",
+      "icon": "🎯",
+      "message": "5 million actions! BongoCat has seen it all now."
+    },
+    {
+      "id": "total_10000000",
+      "type": "total",
+      "threshold": 10000000,
+      "title": "Ten Million Actions",
+      "icon": "🏆",
+      "message": "10 million actions! You are the BongoCat champion."
+    }
+  ]
+}
