@@ -21,6 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
     var statusBarItem: NSStatusItem?
     var preferencesWindowController: PreferencesWindowController?
     var welcomeScreenController: WelcomeScreenController?
+    var hubWindowController: HubWindowController?
 
     // App information
     private let appVersion = "4"
@@ -218,6 +219,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
         menu.addItem(NSMenuItem(title: "Show/Hide Overlay", action: #selector(toggleOverlay), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openPreferences), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "Achievements 🏆", action: #selector(openHub), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "Welcome Guide 🎯", action: #selector(showWelcomeGuide), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
 
@@ -2446,6 +2448,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, ObservableOb
 
     internal func openPreferencesPublic() {
         openPreferences()
+    }
+
+    // MARK: - Hub Window
+
+    @objc private func openHub() {
+        if hubWindowController == nil {
+            hubWindowController = HubWindowController(appDelegate: self)
+        }
+
+        hubWindowController?.show()
+        analytics.trackMenuAction("open_hub")
     }
 
     // MARK: - Welcome Screen

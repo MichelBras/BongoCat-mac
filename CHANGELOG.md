@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **🖼️ Hub Window** - Added a new Achievements UI accessible from the menu bar ("Achievements 🏆")
+  - Navigation sidebar with support for future sections (Skins, Stats, etc.)
+  - Achievements container showing all milestones grouped by category (Keystrokes, Mouse Clicks, Total Activity)
+  - Live stats header displaying current keystroke, click, and total action counts
+  - Achievement cards with emoji icon, title, threshold, progress bar (locked) or checkmark (unlocked)
+  - Unlocked achievements highlighted with accent color; locked ones shown with progress toward unlock
 - **🏆 JSON-Driven Achievements System** - Replaced hardcoded milestone intervals with a flexible Achievement model loaded from `achievements.json`
   - 47 built-in achievements across keystroke, mouse click, and total activity milestones
   - Each achievement has its own id, type, title, icon, and message for rich notifications
